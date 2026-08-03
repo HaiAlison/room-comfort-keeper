@@ -11,9 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/_app'
+import { Route as AppActivityLogsRouteImport } from './routes/_app.activity-logs'
+import { Route as AppAlertsRouteImport } from './routes/_app.alerts'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
+import { Route as AppDeviceControlRouteImport } from './routes/_app.device-control'
 import { Route as AppHistoryRouteImport } from './routes/_app.history'
 import { Route as AppMonitoringRouteImport } from './routes/_app.monitoring'
+import { Route as AppThresholdRouteImport } from './routes/_app.threshold'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -24,9 +28,24 @@ const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppActivityLogsRoute = AppActivityLogsRouteImport.update({
+  id: '/activity-logs',
+  path: '/activity-logs',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAlertsRoute = AppAlertsRouteImport.update({
+  id: '/alerts',
+  path: '/alerts',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDeviceControlRoute = AppDeviceControlRouteImport.update({
+  id: '/device-control',
+  path: '/device-control',
   getParentRoute: () => AppRoute,
 } as any)
 const AppHistoryRoute = AppHistoryRouteImport.update({
@@ -39,39 +58,76 @@ const AppMonitoringRoute = AppMonitoringRouteImport.update({
   path: '/monitoring',
   getParentRoute: () => AppRoute,
 } as any)
+const AppThresholdRoute = AppThresholdRouteImport.update({
+  id: '/threshold',
+  path: '/threshold',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/activity-logs': typeof AppActivityLogsRoute
+  '/alerts': typeof AppAlertsRoute
   '/dashboard': typeof AppDashboardRoute
+  '/device-control': typeof AppDeviceControlRoute
   '/history': typeof AppHistoryRoute
   '/monitoring': typeof AppMonitoringRoute
+  '/threshold': typeof AppThresholdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/activity-logs': typeof AppActivityLogsRoute
+  '/alerts': typeof AppAlertsRoute
   '/dashboard': typeof AppDashboardRoute
+  '/device-control': typeof AppDeviceControlRoute
   '/history': typeof AppHistoryRoute
   '/monitoring': typeof AppMonitoringRoute
+  '/threshold': typeof AppThresholdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
+  '/_app/activity-logs': typeof AppActivityLogsRoute
+  '/_app/alerts': typeof AppAlertsRoute
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/device-control': typeof AppDeviceControlRoute
   '/_app/history': typeof AppHistoryRoute
   '/_app/monitoring': typeof AppMonitoringRoute
+  '/_app/threshold': typeof AppThresholdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/history' | '/monitoring'
+  fullPaths:
+    | '/'
+    | '/activity-logs'
+    | '/alerts'
+    | '/dashboard'
+    | '/device-control'
+    | '/history'
+    | '/monitoring'
+    | '/threshold'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/history' | '/monitoring'
+  to:
+    | '/'
+    | '/activity-logs'
+    | '/alerts'
+    | '/dashboard'
+    | '/device-control'
+    | '/history'
+    | '/monitoring'
+    | '/threshold'
   id:
     | '__root__'
     | '/'
     | '/_app'
+    | '/_app/activity-logs'
+    | '/_app/alerts'
     | '/_app/dashboard'
+    | '/_app/device-control'
     | '/_app/history'
     | '/_app/monitoring'
+    | '/_app/threshold'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -95,11 +151,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/activity-logs': {
+      id: '/_app/activity-logs'
+      path: '/activity-logs'
+      fullPath: '/activity-logs'
+      preLoaderRoute: typeof AppActivityLogsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/alerts': {
+      id: '/_app/alerts'
+      path: '/alerts'
+      fullPath: '/alerts'
+      preLoaderRoute: typeof AppAlertsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/dashboard': {
       id: '/_app/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/device-control': {
+      id: '/_app/device-control'
+      path: '/device-control'
+      fullPath: '/device-control'
+      preLoaderRoute: typeof AppDeviceControlRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/history': {
@@ -116,19 +193,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMonitoringRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/threshold': {
+      id: '/_app/threshold'
+      path: '/threshold'
+      fullPath: '/threshold'
+      preLoaderRoute: typeof AppThresholdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppActivityLogsRoute: typeof AppActivityLogsRoute
+  AppAlertsRoute: typeof AppAlertsRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppDeviceControlRoute: typeof AppDeviceControlRoute
   AppHistoryRoute: typeof AppHistoryRoute
   AppMonitoringRoute: typeof AppMonitoringRoute
+  AppThresholdRoute: typeof AppThresholdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppActivityLogsRoute: AppActivityLogsRoute,
+  AppAlertsRoute: AppAlertsRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppDeviceControlRoute: AppDeviceControlRoute,
   AppHistoryRoute: AppHistoryRoute,
   AppMonitoringRoute: AppMonitoringRoute,
+  AppThresholdRoute: AppThresholdRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
