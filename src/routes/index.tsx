@@ -43,7 +43,8 @@ const schema = z.object({
 });
 
 function LoginPage() {
-  const { loginMutation, isAuthenticated, hydrated } = useAuth();
+  const { loginMutation, isAuthenticated } = useAuth();
+  const hydrated = true;
   const navigate = useNavigate();
 
   useEffect(() => {
