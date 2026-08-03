@@ -79,20 +79,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "ThermaGuard — Smart Room Temperature Monitoring" },
+      { title: "Sign in — ThermaGuard IoT Temperature Monitoring" },
       {
         name: "description",
         content:
-          "IoT dashboard for monitoring room temperature and automatically controlling cooling fans for children and elderly people.",
+          "Sign in to ThermaGuard to monitor room temperature and control cooling fans for vulnerable residents.",
       },
       { name: "author", content: "ThermaGuard" },
-      { property: "og:title", content: "ThermaGuard — Smart Room Temperature Monitoring" },
+      { property: "og:title", content: "Sign in — ThermaGuard IoT Temperature Monitoring" },
       {
         property: "og:description",
-        content: "Monitor room temperature and control cooling fans remotely.",
+        content: "Sign in to ThermaGuard to monitor room temperature and control cooling fans for vulnerable residents.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Sign in — ThermaGuard IoT Temperature Monitoring" },
+      { name: "twitter:description", content: "Sign in to ThermaGuard to monitor room temperature and control cooling fans for vulnerable residents." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/8946bc59-67f8-4a7a-9c45-82ddd8fe334c/id-preview-420095f4--79357be2-74fc-48f3-80e7-788a7c5bebca.lovable.app-1785768632622.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/8946bc59-67f8-4a7a-9c45-82ddd8fe334c/id-preview-420095f4--79357be2-74fc-48f3-80e7-788a7c5bebca.lovable.app-1785768632622.png" },
     ],
     links: [
       {

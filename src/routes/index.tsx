@@ -29,8 +29,8 @@ export const Route = createFileRoute("/")({
         content:
           "Sign in to ThermaGuard to monitor room temperature and control cooling fans for vulnerable residents.",
       },
-      { property: "og:title", content: "Sign in — ThermaGuard" },
-      { property: "og:description", content: "Caregiver access to the smart room monitoring dashboard." },
+      { property: "og:title", content: "Sign in — ThermaGuard IoT Temperature Monitoring" },
+      { property: "og:description", content: "Sign in to ThermaGuard to monitor room temperature and control cooling fans for vulnerable residents." },
     ],
   }),
   component: LoginPage,
