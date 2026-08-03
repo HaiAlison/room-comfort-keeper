@@ -15,7 +15,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/use-auth";
 import { useThemeStore } from "@/stores/theme.store";
 
-export function Navbar({ title, subtitle }: { title: string; subtitle?: string }) {
+export function Navbar({ title, subtitle }: { title: string; subtitle?: string | undefined }) {
   const { user, signOut } = useAuth();
   const theme = useThemeStore((s) => s.theme);
   const toggleTheme = useThemeStore((s) => s.toggleTheme);
