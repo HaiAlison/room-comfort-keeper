@@ -12,13 +12,18 @@ export const Route = createFileRoute("/_app")({
 function AppLayout() {
   const navigate = useNavigate();
   const token = useAuthStore((s) => s.token);
-  const hydrated = useAuthStore((s) => s.hydrated);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (hydrated && !token) navigate({ to: "/", replace: true });
-  }, [hydrated, token, navigate]);
+    void useAuthStore.persist.rehydrate();
+    setReady(true);
+  }, []);
 
-  if (!hydrated || !token) {
+  useEffect(() => {
+    if (ready && !token) navigate({ to: "/", replace: true });
+  }, [ready, token, navigate]);
+
+  if (!ready || !token) {
     return (
       <div className="grid min-h-svh place-items-center bg-background text-sm text-muted-foreground">
         Checking your session…
