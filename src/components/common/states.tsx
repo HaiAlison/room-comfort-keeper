@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
-export function LoadingSkeleton({ rows = 3, className }: { rows?: number; className?: string }) {
+export function LoadingSkeleton({ rows = 3, className }: { rows?: number | undefined; className?: string | undefined }) {
   return (
     <div className={cn("space-y-3", className)} role="status" aria-label="Loading">
       {Array.from({ length: rows }).map((_, i) => (
@@ -44,7 +44,7 @@ export function EmptyState({
   );
 }
 
-export function ErrorState({ message, onRetry }: { message?: string; onRetry?: () => void }) {
+export function ErrorState({ message, onRetry }: { message?: string | undefined; onRetry?: (() => void) | undefined }) {
   return (
     <div className="card-soft flex flex-col items-center justify-center gap-3 p-10 text-center">
       <div className="grid h-11 w-11 place-items-center rounded-full bg-destructive/10 text-destructive">

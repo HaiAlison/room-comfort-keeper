@@ -60,9 +60,9 @@ export interface ActivityLog {
 }
 
 export interface HistoryQuery {
-  range?: "24h" | "7d" | "custom";
-  from?: string;
-  to?: string;
+  range?: "24h" | "7d" | "custom" | undefined;
+  from?: string | undefined;
+  to?: string | undefined;
 }
 
 export type ReadingStatus = "low" | "normal" | "high";
