@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { BellRing } from "lucide-react";
 import { PageShell } from "@/components/layout/PageShell";
@@ -6,6 +6,8 @@ import { AlertCard } from "@/components/cards/AlertCard";
 import { EmptyState, ErrorState, LoadingSkeleton } from "@/components/common/states";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAlerts, useResolveAlert } from "@/hooks/use-events";
+import { useAlertStore } from "@/stores/alert.store";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/alerts")({
   head: () => ({
@@ -25,7 +27,11 @@ function AlertsPage() {
   const resolve = useResolveAlert();
 
   const rows = (alerts.data ?? []).filter((a) => (filter === "all" ? true : a.status === filter));
+  const setHasUnread = useAlertStore((s) => s.setHasUnread);
 
+  useEffect(() => {
+    setHasUnread(false);
+  }, [setHasUnread]);
   return (
     <PageShell title="Alerts" subtitle="Every event that needs caregiver attention">
       <Tabs value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
