@@ -5,13 +5,15 @@ import { getActivityLogs } from "@/services/log.service";
 import { useCurrentUserEmail } from "@/stores/auth.store";
 import { useThemeStore } from "@/stores/theme.store";
 import { alertService } from "@/services/alert.service";
+import { AlertItem } from "@/lib/types";
+import { IPagination } from "@/types/api";
 
 export function useAlerts() {
   const autoRefresh = useThemeStore((s) => s.autoRefresh);
   return useQuery({
     queryKey: QUERY_KEYS.alerts,
     queryFn: alertService.getAlerts,
-    select: (data: any) => data.results,
+    select: (data: IPagination<AlertItem>) => data.results,
     refetchInterval: autoRefresh ? 8000 : false,
   });
 }

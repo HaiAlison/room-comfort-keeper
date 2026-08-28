@@ -82,29 +82,6 @@ export function pushAlert(entry: Omit<AlertItem, "id" | "timestamp" | "status">)
 // Seed a little history of alerts/logs so the UI is never empty on first load.
 (function seedEvents() {
   const now = Date.now();
-  db.alerts = [
-    {
-      id: id("alr"),
-      timestamp: new Date(now - 2 * HOUR).toISOString(),
-      severity: "critical",
-      message: "Temperature exceeded maximum threshold (31.4°C)",
-      status: "resolved",
-    },
-    {
-      id: id("alr"),
-      timestamp: new Date(now - 9 * HOUR).toISOString(),
-      severity: "warning",
-      message: "Sensor reported intermittent readings",
-      status: "resolved",
-    },
-    {
-      id: id("alr"),
-      timestamp: new Date(now - 26 * HOUR).toISOString(),
-      severity: "info",
-      message: "Device reconnected to the network",
-      status: "resolved",
-    },
-  ];
   db.logs = [
     {
       id: id("log"),
@@ -156,7 +133,6 @@ export function tick(): TemperatureReading {
         mode: "auto",
         updatedAt: d.toISOString(),
       };
-      pushAlert({ severity: "critical", message: `Temperature exceeded maximum threshold (${next}°C)` });
       pushLog({ user: "system", action: "Fan turned ON (auto)", result: "success" });
     } else if (next <= db.threshold.max - 0.5 && db.fan.on) {
       db.fan = {
