@@ -43,14 +43,6 @@ export interface DeviceStatus {
   battery: number;
 }
 
-export interface AlertItem {
-  id: string;
-  timestamp: string;
-  severity: Severity;
-  message: string;
-  status: AlertStatus;
-}
-
 export interface ActivityLog {
   id: string;
   timestamp: string;
@@ -66,3 +58,26 @@ export interface HistoryQuery {
 }
 
 export type ReadingStatus = "low" | "normal" | "high";
+
+
+export type AlertMetric = 'temperature' | 'humidity' | 'co2';
+
+export interface AlertThreshold {
+  max: number;
+  min: number;
+  actual: number;
+  metric: AlertMetric;
+}
+
+export interface AlertItem {
+  id: string;
+  roomId: string;
+  severity: Severity;
+  message: string;
+  status: AlertStatus;
+  resolvedAt: string | null;
+  resolvedBy: string | null;
+  threshold: AlertThreshold;
+  isRead: boolean;
+  timestamp: string;
+}
