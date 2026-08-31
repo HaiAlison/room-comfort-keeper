@@ -6,7 +6,7 @@ import { useCurrentUserEmail } from "@/stores/auth.store";
 import { useThemeStore } from "@/stores/theme.store";
 import { alertService } from "@/services/alert.service";
 import { AlertItem } from "@/lib/types";
-import { IPagination } from "@/types/api";
+import { ActivityLogsQuery, IPagination } from "@/types/api";
 
 export function useAlerts() {
   const autoRefresh = useThemeStore((s) => s.autoRefresh);
@@ -32,6 +32,10 @@ export function useResolveAlert() {
   });
 }
 
-export function useActivityLogs() {
-  return useQuery({ queryKey: QUERY_KEYS.logs, queryFn: getActivityLogs });
+export function useActivityLogs(query: ActivityLogsQuery = {}) {
+  return useQuery({
+    queryKey: [...QUERY_KEYS.logs, query],
+    queryFn: () => getActivityLogs(query),
+  });
 }
+
