@@ -19,3 +19,11 @@ export interface IPagination<T> {
     totalItems: number;
     totalPages: number;
 }
+
+export interface ActivityLogsQuery {
+    offset?: number;
+    limit?: number;
+    result?: "success" | "failed";
+    from?: string; // ISO date string
+    to?: string;   // ISO date string
+}
