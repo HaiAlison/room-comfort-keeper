@@ -1,9 +1,6 @@
-import { ApiError, mockRequest } from "./api";
-import { pushLog } from "@/lib/mock-data";
+import { API_BASE_URL, API_ROUTES, ApiError } from "./api";
+import { setAccessToken, removeTokens } from "@/lib/auth-tokens";
 import type { Session } from "@/lib/types";
-
-const DEMO_EMAIL = "caregiver@smartroom.io";
-const DEMO_PASSWORD = "smartroom";
 
 export interface LoginPayload {
   email: string;
@@ -12,27 +9,46 @@ export interface LoginPayload {
 }
 
 export async function login(payload: LoginPayload): Promise<Session> {
-  return mockRequest(() => {
-    if (payload.email.trim().toLowerCase() !== DEMO_EMAIL || payload.password !== DEMO_PASSWORD) {
-      throw new ApiError("Invalid email or password", 401);
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${API_ROUTES.login}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: payload.email, password: payload.password }),
+    });
+  } catch {
+    throw new ApiError("Cannot reach the server. Is the backend running?", 0);
+  }
+
+  if (!response.ok) {
+    let message = "Invalid email or password";
+    try {
+      const body = (await response.json()) as { message?: string | string[] };
+      if (body?.message) {
+        message = Array.isArray(body.message) ? body.message.join(", ") : body.message;
+      }
+    } catch {
+      /* keep default message */
     }
-    pushLog({ user: payload.email, action: "User signed in", result: "success" });
-    return {
-      token: `mock.${btoa(payload.email)}.token`,
-      user: {
-        id: "usr_1",
-        name: "Amina Caregiver",
-        email: DEMO_EMAIL,
-        role: "Caregiver",
-      },
-    } satisfies Session;
-  }, 600);
+    throw new ApiError(message, response.status);
+  }
+
+  const session = (await response.json()) as Session;
+
+  // The axios client (src/lib/api.ts) reads the token from localStorage —
+  // keep it in sync so alerts/activity-logs requests carry the JWT too.
+  setAccessToken(session.token);
+
+  return session;
 }
 
-export async function logout(email: string): Promise<void> {
-  return mockRequest(() => {
-    pushLog({ user: email, action: "User signed out", result: "success" });
-  }, 200);
+export async function logout(_email: string): Promise<void> {
+  // Stateless JWT — clearing client-side tokens is enough.
+  removeTokens();
+  return Promise.resolve();
 }
 
-export const DEMO_CREDENTIALS = { email: DEMO_EMAIL, password: DEMO_PASSWORD };
+export const DEMO_CREDENTIALS = {
+  email: "caregiver@smartroom.io",
+  password: "smartroom",
+};
