@@ -1,38 +1,54 @@
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { login, logout, type LoginPayload } from "@/services/auth.service";
+import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/stores/auth.store";
+import type { LoginCredentials, RegisterCredentials } from "@/types/auth";
+import { getAccessToken } from "@/lib/auth-tokens";
 
 export function useAuth() {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
-  const token = useAuthStore((s) => s.token);
   const hydrated = useAuthStore((s) => s.hydrated);
   const signIn = useAuthStore((s) => s.signIn);
   const signOut = useAuthStore((s) => s.signOut);
 
   const loginMutation = useMutation({
-    mutationFn: (payload: LoginPayload) => login(payload),
-    onSuccess: (session, variables) => {
-      signIn(session, variables.remember ?? true);
-      toast.success(`Welcome back, ${session.user.name.split(" ")[0]}`);
-      navigate({ to: "/dashboard" });
+    mutationFn: (credentials: LoginCredentials) => authService.login(credentials),
+    onSuccess: (data) => {
+      const publicUser = authService.persistSession(data);
+      signIn(publicUser);
+      const firstName = publicUser.firstName ?? publicUser.email.split("@")[0];
+      toast.success(`Welcome back, ${firstName}!`);
+      void navigate({ to: "/dashboard" });
     },
     onError: (error: Error) => toast.error("Sign in failed", { description: error.message }),
   });
 
-  const handleSignOut = async () => {
-    await logout(user?.email ?? "unknown");
+  const registerMutation = useMutation({
+    mutationFn: (credentials: RegisterCredentials) => authService.register(credentials),
+    onSuccess: (data) => {
+      const publicUser = authService.persistSession(data);
+      signIn(publicUser);
+      const firstName = publicUser.firstName ?? publicUser.email.split("@")[0];
+      toast.success(`Account created. Welcome, ${firstName}!`);
+      void navigate({ to: "/dashboard" });
+    },
+    onError: (error: Error) => toast.error("Registration failed", { description: error.message }),
+  });
+
+  const handleSignOut = () => {
+    authService.clearSession();
     signOut();
-    navigate({ to: "/", replace: true });
+    void navigate({ to: "/login", replace: true });
   };
 
   return {
     user,
-    isAuthenticated: Boolean(token),
+    isAuthenticated: Boolean(getAccessToken()),
     hydrated,
     loginMutation,
+    registerMutation,
     signOut: handleSignOut,
   };
 }

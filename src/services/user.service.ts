@@ -1,13 +1,10 @@
 import api from "@/lib/api";
-import { UserDetailResponse } from "@/types/auth";
+import type { PublicUser } from "@/types/auth";
 
 export const userService = {
-    getUserDetail: async (): Promise<UserDetailResponse> => {
-        const res = await api.get('/users');
-        return res.data;
-    },
-    updateSettings: async (data: { rateLimitPerMinute?: number; dailyLimit?: number }) => {
-        const res = await api.patch('/users/me/settings', data);
-        return res.data;
-    }
-}
+  /** GET /auth/me — returns the authenticated user's public profile */
+  me: async (): Promise<PublicUser> => {
+    const res = await api.get<PublicUser>("/auth/me");
+    return res.data;
+  },
+};

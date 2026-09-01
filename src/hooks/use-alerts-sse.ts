@@ -6,7 +6,7 @@ export function useAlertsSSE() {
   const setHasUnread = useAlertStore((s) => s.setHasUnread);
 
   useEffect(() => {
-    const sse = new EventSource(`${import.meta.env.VITE_API_URL}/alerts/events`);
+    const sse = new EventSource(`${import.meta.env.VITE_API_BASE_URL}/alerts/events`);
 
     sse.onmessage = (event) => {
       const data = JSON.parse(event.data);

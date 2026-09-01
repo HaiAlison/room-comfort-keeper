@@ -1,22 +1,13 @@
+import { useQuery } from "@tanstack/react-query";
 import { userService } from "@/services/user.service";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getAccessToken } from "@/lib/auth-tokens";
 
 export function useUser() {
-    return useQuery({
-        queryKey: ['user'],
-        queryFn: userService.getUserDetail,
-        staleTime: 1000 * 60 * 5,
-        retry: 0,
-        enabled: !!localStorage.getItem('access_token'),
-    });
-}
-
-export function useUpdateSettings() {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: userService.updateSettings,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['user'] });
-        }
-    });
+  return useQuery({
+    queryKey: ["user", "me"],
+    queryFn: userService.me,
+    staleTime: 1000 * 60 * 5, // 5 min
+    retry: 0,
+    enabled: Boolean(getAccessToken()),
+  });
 }

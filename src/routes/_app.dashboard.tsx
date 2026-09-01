@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_app/dashboard")({
   component: DashboardPage,
 });
 
-function DashboardPage() {
+export function DashboardPage() {
   const current = useCurrentTemperature();
   const threshold = useThreshold();
   const fan = useFanState();
