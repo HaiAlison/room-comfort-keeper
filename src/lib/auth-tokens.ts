@@ -3,11 +3,13 @@ const ACCESS_TOKEN_KEY = 'access_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
 
 export const getAccessToken = (): string | null => {
-    return localStorage.getItem(ACCESS_TOKEN_KEY);
+    return typeof localStorage !== "undefined" ? localStorage.getItem(ACCESS_TOKEN_KEY) : null;
 };
 
 export const setAccessToken = (token: string) => {
-    localStorage.setItem(ACCESS_TOKEN_KEY, token);
+    if (typeof localStorage !== "undefined") {
+        localStorage.setItem(ACCESS_TOKEN_KEY, token);
+    }
 };
 
 export const getRefreshToken = (): string | null => {

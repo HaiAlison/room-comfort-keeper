@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosError } from 'axios';
 import { getAccessToken, getRefreshToken, removeTokens, setAccessToken, setRefreshToken } from './auth-tokens';
 
-const BASE_URL = import.meta.env['VITE_API_URL'];
+const BASE_URL = import.meta.env['VITE_API_BASE_URL'];
 
 const api: AxiosInstance = axios.create({
     baseURL: BASE_URL,

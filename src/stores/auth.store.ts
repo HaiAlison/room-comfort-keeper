@@ -1,12 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Session, User } from "@/lib/types";
+import type { PublicUser } from "@/types/auth";
 
 interface AuthState {
-  token: string | null;
-  user: User | null;
+  user: PublicUser | null;
   hydrated: boolean;
-  signIn: (session: Session, remember: boolean) => void;
+  signIn: (user: PublicUser) => void;
   signOut: () => void;
   setHydrated: () => void;
 }
@@ -14,21 +13,15 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
-      token: null,
       user: null,
       hydrated: false,
-      signIn: (session, remember) => {
-        if (!remember && typeof window !== "undefined") {
-          sessionStorage.setItem("smartroom-session-only", "1");
-        }
-        set({ token: session.token, user: session.user });
-      },
-      signOut: () => set({ token: null, user: null }),
+      signIn: (user) => set({ user }),
+      signOut: () => set({ user: null }),
       setHydrated: () => set({ hydrated: true }),
     }),
     {
       name: "smartroom-auth",
-      partialize: (s) => ({ token: s.token, user: s.user }),
+      partialize: (s) => ({ user: s.user }),
       onRehydrateStorage: () => (state) => state?.setHydrated(),
     },
   ),

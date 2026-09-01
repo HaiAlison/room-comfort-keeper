@@ -1,38 +1,41 @@
-import { ApiError, mockRequest } from "./api";
-import { pushLog } from "@/lib/mock-data";
-import type { Session } from "@/lib/types";
+import api from "@/lib/api";
+import { setAccessToken, setRefreshToken, removeTokens } from "@/lib/auth-tokens";
+import type { AuthResponse, LoginCredentials, PublicUser, RefreshResponse, RegisterCredentials } from "@/types/auth";
 
-const DEMO_EMAIL = "caregiver@smartroom.io";
-const DEMO_PASSWORD = "smartroom";
+export const authService = {
+  /** POST /auth/login */
+  login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
+    const res = await api.post<AuthResponse>("/auth/login", credentials);
+    return res.data;
+  },
 
-export interface LoginPayload {
-  email: string;
-  password: string;
-  remember?: boolean;
-}
+  /** POST /auth/register */
+  register: async (credentials: RegisterCredentials): Promise<AuthResponse> => {
+    const res = await api.post<AuthResponse>("/auth/register", credentials);
+    return res.data;
+  },
 
-export async function login(payload: LoginPayload): Promise<Session> {
-  return mockRequest(() => {
-    if (payload.email.trim().toLowerCase() !== DEMO_EMAIL || payload.password !== DEMO_PASSWORD) {
-      throw new ApiError("Invalid email or password", 401);
-    }
-    pushLog({ user: payload.email, action: "User signed in", result: "success" });
-    return {
-      token: `mock.${btoa(payload.email)}.token`,
-      user: {
-        id: "usr_1",
-        name: "Amina Caregiver",
-        email: DEMO_EMAIL,
-        role: "Caregiver",
-      },
-    } satisfies Session;
-  }, 600);
-}
+  /** POST /auth/refresh */
+  refresh: async (refresh_token: string): Promise<RefreshResponse> => {
+    const res = await api.post<RefreshResponse>("/auth/refresh", { refresh_token });
+    return res.data;
+  },
 
-export async function logout(email: string): Promise<void> {
-  return mockRequest(() => {
-    pushLog({ user: email, action: "User signed out", result: "success" });
-  }, 200);
-}
+  /** GET /auth/me */
+  me: async (): Promise<PublicUser> => {
+    const res = await api.get<PublicUser>("/auth/me");
+    return res.data;
+  },
 
-export const DEMO_CREDENTIALS = { email: DEMO_EMAIL, password: DEMO_PASSWORD };
+  /** Persist tokens to localStorage then return the user */
+  persistSession: (data: AuthResponse): PublicUser => {
+    setAccessToken(data.tokens.access_token);
+    setRefreshToken(data.tokens.refresh_token);
+    return data.user;
+  },
+
+  /** Clear all stored tokens */
+  clearSession: (): void => {
+    removeTokens();
+  },
+};

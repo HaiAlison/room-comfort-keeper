@@ -59,7 +59,9 @@ export function Navbar({ title, subtitle }: { title: string; subtitle?: string |
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
-              <p className="text-sm font-medium">{user?.name ?? "Signed in"}</p>
+              <p className="text-sm font-medium">
+                {user ? [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email : "Signed in"}
+              </p>
               <p className="truncate text-xs font-normal text-muted-foreground">{user?.email}</p>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
