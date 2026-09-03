@@ -112,16 +112,61 @@ export async function getTemperatureHistory(
 }
 
 export async function getThreshold(): Promise<Threshold> {
-  return mockRequest(() => ({ ...db.threshold }), 200);
+  const response = await fetch(
+    `${API_BASE_URL}${API_ROUTES.threshold}`,
+  );
+
+  if (!response.ok) {
+    throw new ApiError(
+      "Could not load threshold",
+      response.status,
+    );
+  }
+
+  const data = await response.json();
+
+  return {
+    min: data.minimumTemperature,
+    max: data.maximumTemperature,
+  };
 }
 
-export async function updateThreshold(next: Threshold, user: string): Promise<Threshold> {
-  return mockRequest(() => {
-    if (next.min >= next.max) {
-      throw new ApiError("Minimum temperature must be lower than maximum temperature");
-    }
-    db.threshold = { ...next };
-    pushLog({ user, action: `Threshold updated to ${next.min}°C / ${next.max}°C`, result: "success" });
-    return { ...db.threshold };
-  }, 500);
+export async function updateThreshold(
+  next: Threshold,
+  _user: string,
+): Promise<Threshold> {
+  const response = await fetch(
+    `${API_BASE_URL}${API_ROUTES.threshold}`,
+    {
+      method: "PUT",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify({
+        minimumTemperature: next.min,
+        maximumTemperature: next.max,
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    const errorData = await response
+      .json()
+      .catch(() => null);
+
+    throw new ApiError(
+      errorData?.message ??
+        "Could not update threshold",
+      response.status,
+    );
+  }
+
+  const data = await response.json();
+
+  return {
+    min: data.minimumTemperature,
+    max: data.maximumTemperature,
+  };
 }
