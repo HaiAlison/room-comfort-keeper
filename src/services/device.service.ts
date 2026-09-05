@@ -1,8 +1,9 @@
-import { API_BASE_URL, API_ROUTES, ApiError } from "./api";
+import api from "@/lib/api";
 import type { DeviceStatus, FanState } from "@/lib/types";
 
 /**
- * Devices — real backend integration.
+ * Devices — real backend integration (axios client from lib/api,
+ * carries the JWT and refresh logic automatically).
  *
  * Fan state + control:   GET /devices/fan, PUT /devices/fan { on },
  *                        PUT /devices/fan/mode { mode }   (MQTT module)
@@ -11,33 +12,6 @@ import type { DeviceStatus, FanState } from "@/lib/types";
 
 const FAN_DEVICE_ID =
   (import.meta.env["VITE_FAN_DEVICE_ID"] as string | undefined) ?? "esp32-room-01-fan";
-
-async function http<T>(path: string, init?: RequestInit): Promise<T> {
-  let response: Response;
-  try {
-    response = await fetch(`${API_BASE_URL}${path}`, {
-      headers: { "Content-Type": "application/json" },
-      ...init,
-    });
-  } catch {
-    throw new ApiError("Cannot reach the server. Is the backend running?", 0);
-  }
-
-  if (!response.ok) {
-    let message = `Request failed (${response.status})`;
-    try {
-      const body = (await response.json()) as { message?: string | string[] };
-      if (body?.message) {
-        message = Array.isArray(body.message) ? body.message.join(", ") : body.message;
-      }
-    } catch {
-      /* non-JSON body */
-    }
-    throw new ApiError(message, response.status);
-  }
-
-  return (await response.json()) as T;
-}
 
 /** BE device shape (devices module). */
 interface BeDevice {
@@ -53,7 +27,8 @@ interface BeDevice {
 }
 
 export async function getDeviceStatus(): Promise<DeviceStatus> {
-  const d = await http<BeDevice>(`/devices/${FAN_DEVICE_ID}`);
+  const response = await api.get<BeDevice>(`/devices/${FAN_DEVICE_ID}`);
+  const d = response.data;
   return {
     id: d.deviceId,
     name: d.name,
@@ -66,14 +41,13 @@ export async function getDeviceStatus(): Promise<DeviceStatus> {
 }
 
 export async function getFanState(): Promise<FanState> {
-  return http<FanState>(API_ROUTES.fan);
+  const response = await api.get<FanState>("/devices/fan");
+  return response.data;
 }
 
 async function setFan(on: boolean, _user: string): Promise<FanState> {
-  return http<FanState>(API_ROUTES.fan, {
-    method: "PUT",
-    body: JSON.stringify({ on }),
-  });
+  const response = await api.put<FanState>("/devices/fan", { on });
+  return response.data;
 }
 
 export async function turnFanOn(user: string): Promise<FanState> {
@@ -85,8 +59,6 @@ export async function turnFanOff(user: string): Promise<FanState> {
 }
 
 export async function setFanMode(mode: "auto" | "manual", _user: string): Promise<FanState> {
-  return http<FanState>(`${API_ROUTES.fan}/mode`, {
-    method: "PUT",
-    body: JSON.stringify({ mode }),
-  });
+  const response = await api.put<FanState>("/devices/fan/mode", { mode });
+  return response.data;
 }

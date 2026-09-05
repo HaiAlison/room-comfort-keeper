@@ -1,6 +1,4 @@
 import api from "@/lib/api";
-import { mockRequest } from "./api";
-import { db, pushLog } from "@/lib/mock-data";
 import type { AlertItem } from "@/lib/types";
 import { IPagination } from "@/types/api";
 

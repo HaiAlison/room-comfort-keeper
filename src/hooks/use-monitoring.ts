@@ -9,15 +9,19 @@ import {
   updateThreshold,
 } from "@/services/monitoring.service";
 import { useCurrentUserEmail } from "@/stores/auth.store";
+import { useRealtimeStore } from "@/stores/realtime.store";
 import { useThemeStore } from "@/stores/theme.store";
 
 export function useCurrentTemperature() {
   const autoRefresh = useThemeStore((s) => s.autoRefresh);
   const interval = useThemeStore((s) => s.refreshIntervalMs);
+  // SSE pushes readings straight into this query's cache — no need to
+  // poll while the stream is connected (see use-monitoring-sse).
+  const sseLive = useRealtimeStore((s) => s.monitoringLive);
   return useQuery({
     queryKey: QUERY_KEYS.currentTemperature,
     queryFn: getCurrentTemperature,
-    refetchInterval: autoRefresh ? interval : false,
+    refetchInterval: autoRefresh && !sseLive ? interval : false,
   });
 }
 

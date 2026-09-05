@@ -4,6 +4,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { useAuthStore } from "@/stores/auth.store";
 import { useAlertsSSE } from "@/hooks/use-alerts-sse";
+import { useMonitoringSSE } from "@/hooks/use-monitoring-sse";
 
 export const Route = createFileRoute("/_app")({
   ssr: false,
@@ -16,6 +17,7 @@ function AppLayout() {
   const [ready, setReady] = useState(false);
   
   useAlertsSSE();
+  useMonitoringSSE();
 
   useEffect(() => {
     void useAuthStore.persist.rehydrate();
