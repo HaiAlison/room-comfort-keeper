@@ -38,15 +38,15 @@ export function useCurrentTemperature() {
     //
     // NON-LIVE:
     // lấy reading cuối từ DB
-    enabled:
-      !isLive,
+    // enabled:
+    //   !isLive,
 
     // NON-LIVE poll 30s.
     // DB có thể lưu 60s/lần,
     // nhưng poll 30s giúp tránh lệch nhịp.
     refetchInterval:
       !isLive
-        ? 30_000
+        ? 10_000
         : false,
 
     refetchOnWindowFocus:

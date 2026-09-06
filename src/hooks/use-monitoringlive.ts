@@ -1,8 +1,17 @@
-import { useEffect, useRef } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import {
+  useEffect,
+  useRef,
+} from "react";
+
+import {
+  useQueryClient,
+} from "@tanstack/react-query";
+
 import mqtt from "mqtt";
 
-import { QUERY_KEYS } from "@/lib/constants";
+import {
+  QUERY_KEYS,
+} from "@/lib/constants";
 
 export function useLiveTemperature(
   enabled: boolean,
@@ -41,6 +50,18 @@ export function useLiveTemperature(
       import.meta.env
         .VITE_MQTT_HUMIDITY_TOPIC;
 
+    if (
+      !url ||
+      !temperatureTopic ||
+      !humidityTopic
+    ) {
+      console.error(
+        "Missing MQTT configuration",
+      );
+
+      return;
+    }
+
     const client =
       mqtt.connect(url, {
         username,
@@ -52,106 +73,154 @@ export function useLiveTemperature(
             .slice(2)}`,
 
         clean: true,
-        reconnectPeriod: 5000,
-        connectTimeout: 10000,
+
+        reconnectPeriod:
+          5000,
+
+        connectTimeout:
+          10000,
       });
 
-    client.on("connect", () => {
-      console.log(
-        "FE connected to MQTT",
-      );
-
-      client.subscribe(
-        [
-          temperatureTopic,
-          humidityTopic,
-        ],
-        (error) => {
-          if (error) {
-            console.error(
-              "MQTT subscribe error:",
-              error,
-            );
-          }
-        },
-      );
-    });
-
     client.on(
-      "message",
-      (topic, payload) => {
-        const value = Number(
-          payload
-            .toString()
-            .trim(),
+      "connect",
+      () => {
+        console.log(
+          "FE connected to MQTT",
         );
 
-        if (!Number.isFinite(value)) {
-          return;
-        }
+        client.subscribe(
+          [
+            temperatureTopic,
+            humidityTopic,
+          ],
 
-        if (
-          topic === temperatureTopic
-        ) {
-          temperatureRef.current =
-            value;
-        }
-
-        if (
-          topic === humidityTopic
-        ) {
-          humidityRef.current =
-            value;
-        }
-
-        // Chưa đủ một cặp
-        if (
-          temperatureRef.current ===
-            null ||
-          humidityRef.current ===
-            null
-        ) {
-          return;
-        }
-
-        // Ghi trực tiếp vào cache mà
-        // useCurrentTemperature() đang dùng
-        queryClient.setQueryData(
-          QUERY_KEYS.currentTemperature,
-          {
-            id: `mqtt-${Date.now()}`,
-            timestamp:
-              new Date().toISOString(),
-
-            temperature:
-              temperatureRef.current,
-
-            humidity:
-              humidityRef.current,
+          (error) => {
+            if (error) {
+              console.error(
+                "MQTT subscribe error:",
+                error,
+              );
+            }
           },
         );
-
-        // Chờ cặp MQTT tiếp theo
-        temperatureRef.current =
-          null;
-
-        humidityRef.current =
-          null;
       },
     );
 
-    client.on("error", (error) => {
-      console.error(
-        "MQTT connection error:",
-        error,
-      );
-    });
+    client.on(
+      "message",
+      (
+        topic,
+        payload,
+      ) => {
+        const value =
+          Number(
+            payload
+              .toString()
+              .trim(),
+          );
 
-    client.on("reconnect", () => {
-      console.log(
-        "MQTT reconnecting...",
-      );
-    });
+        if (
+          !Number.isFinite(value)
+        ) {
+          return;
+        }
+
+        /*
+         * Temperature tới
+         * → update temperature NGAY.
+         * → giữ humidity hiện tại.
+         */
+        if (
+          topic ===
+          temperatureTopic
+        ) {
+          temperatureRef.current =
+            value;
+
+          queryClient.setQueryData(
+            QUERY_KEYS
+              .currentTemperature,
+
+            (oldData: any) => ({
+              ...oldData,
+
+              id:
+                `mqtt-${Date.now()}`,
+
+              timestamp:
+                new Date()
+                  .toISOString(),
+
+              temperature:
+                value,
+
+              humidity:
+                humidityRef.current ??
+                oldData?.humidity ??
+                0,
+            }),
+          );
+
+          return;
+        }
+
+        /*
+         * Humidity tới
+         * → update humidity NGAY.
+         * → giữ temperature hiện tại.
+         */
+        if (
+          topic ===
+          humidityTopic
+        ) {
+          humidityRef.current =
+            value;
+
+          queryClient.setQueryData(
+            QUERY_KEYS
+              .currentTemperature,
+
+            (oldData: any) => ({
+              ...oldData,
+
+              id:
+                `mqtt-${Date.now()}`,
+
+              timestamp:
+                new Date()
+                  .toISOString(),
+
+              temperature:
+                temperatureRef.current ??
+                oldData?.temperature ??
+                0,
+
+              humidity:
+                value,
+            }),
+          );
+        }
+      },
+    );
+
+    client.on(
+      "reconnect",
+      () => {
+        console.log(
+          "MQTT reconnecting...",
+        );
+      },
+    );
+
+    client.on(
+      "error",
+      (error) => {
+        console.error(
+          "MQTT connection error:",
+          error,
+        );
+      },
+    );
 
     return () => {
       client.end(true);
