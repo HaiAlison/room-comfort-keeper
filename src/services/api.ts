@@ -2,7 +2,7 @@
  * Single integration point for the future NestJS REST API.
  * Swap `mockRequest` for a real fetch wrapper and the rest of the app is unchanged.
  */
-export const API_BASE_URL = import.meta.env["VITE_API_BASE_URL"] ?? "/api";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const API_ROUTES = {
   login: "/auth/login",

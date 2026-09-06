@@ -45,7 +45,7 @@ export interface DeviceStatus {
 
 export interface ActivityLog {
   id: string;
-  timestamp: string;
+  created_at: string;
   user: string;
   action: string;
   result: "success" | "failed";

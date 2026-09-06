@@ -66,7 +66,7 @@ export function ActivityTable({ logs }: { logs: ActivityLog[] }) {
               <TableBody>
                 {pageRows.map((log) => (
                   <TableRow key={log.id}>
-                    <TableCell className="whitespace-nowrap">{formatDateTime(log.timestamp)}</TableCell>
+                    <TableCell className="whitespace-nowrap">{formatDateTime(log.created_at)}</TableCell>
                     <TableCell className="text-muted-foreground">{log.user}</TableCell>
                     <TableCell className="font-medium">{log.action}</TableCell>
                     <TableCell className="text-right">
