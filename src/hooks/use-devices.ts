@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { QUERY_KEYS } from "@/lib/constants";
 import { getDeviceStatus, getFanState, setFanMode, turnFanOff, turnFanOn } from "@/services/device.service";
 import { useCurrentUserEmail } from "@/stores/auth.store";
+import { useRealtimeStore } from "@/stores/realtime.store";
 import { useThemeStore } from "@/stores/theme.store";
 
 export function useDeviceStatus() {
@@ -17,10 +18,13 @@ export function useDeviceStatus() {
 export function useFanState() {
   const autoRefresh = useThemeStore((s) => s.autoRefresh);
   const interval = useThemeStore((s) => s.refreshIntervalMs);
+  // SSE (use-fan-sse) ghi trạng thái quạt thẳng vào cache này —
+  // đang nối stream thì khỏi poll, rớt stream thì poll làm fallback.
+  const sseLive = useRealtimeStore((s) => s.fanLive);
   return useQuery({
     queryKey: QUERY_KEYS.fan,
     queryFn: getFanState,
-    refetchInterval: autoRefresh ? interval : false,
+    refetchInterval: autoRefresh && !sseLive ? interval : false,
   });
 }
 
