@@ -9,6 +9,7 @@ import {
   updateThreshold,
 } from "@/services/monitoring.service";
 import { useCurrentUserEmail } from "@/stores/auth.store";
+import { useRealtimeStore } from "@/stores/realtime.store";
 import { useThemeStore } from "@/stores/theme.store";
 import {
   useLiveTemperature,
@@ -20,11 +21,16 @@ export function useCurrentTemperature() {
       (s) => s.autoRefresh,
     );
 
-  // LIVE ON:
-  // kết nối trực tiếp MQTT WS
+  // LIVE ON: nhận reading real-time qua SSE (/monitoring/events)
   useLiveTemperature(
     isLive,
   );
+
+  // SSE đang nối thì khỏi poll — reading tự được ghi vào cache.
+  const sseLive =
+    useRealtimeStore(
+      (s) => s.monitoringLive,
+    );
 
   return useQuery({
     queryKey:
@@ -33,21 +39,19 @@ export function useCurrentTemperature() {
     queryFn:
       getCurrentTemperature,
 
-    // LIVE:
-    // không gọi API current
+    // LUÔN fetch 1 lần khi mở trang, kể cả LIVE mode.
     //
-    // NON-LIVE:
-    // lấy reading cuối từ DB
-    // enabled:
-    //   !isLive,
+    // Trước đây LIVE mode không fetch và cũng không poll, nên
+    // dashboard trống cho tới lần thiết bị publish kế tiếp (15s+,
+    // và nếu thiết bị đang ngủ thì trống vô hạn) — đúng hiện tượng
+    // "mở dashboard chờ một lúc mới thấy số".
+    // Giờ: hiện ngay reading cuối trong DB, rồi SSE đẩy số mới lên.
 
-    // NON-LIVE poll 30s.
-    // DB có thể lưu 60s/lần,
-    // nhưng poll 30s giúp tránh lệch nhịp.
+    // Poll chỉ còn là fallback khi SSE chưa/không nối được.
     refetchInterval:
-      !isLive
-        ? 10_000
-        : false,
+      isLive && sseLive
+        ? false
+        : 10_000,
 
     refetchOnWindowFocus:
       false,
