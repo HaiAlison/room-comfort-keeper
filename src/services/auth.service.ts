@@ -1,9 +1,7 @@
-import { ApiError, mockRequest } from "./api";
-import { pushLog } from "@/lib/mock-data";
+import api from "@/lib/api";
+import { setAccessToken, removeTokens } from "@/lib/auth-tokens";
 import type { Session } from "@/lib/types";
-
-const DEMO_EMAIL = "caregiver@smartroom.io";
-const DEMO_PASSWORD = "smartroom";
+import { isAxiosError } from "axios";
 
 export interface LoginPayload {
   email: string;
@@ -12,27 +10,37 @@ export interface LoginPayload {
 }
 
 export async function login(payload: LoginPayload): Promise<Session> {
-  return mockRequest(() => {
-    if (payload.email.trim().toLowerCase() !== DEMO_EMAIL || payload.password !== DEMO_PASSWORD) {
-      throw new ApiError("Invalid email or password", 401);
+  try {
+    const response = await api.post<Session>("/auth/login", {
+      email: payload.email,
+      password: payload.password,
+    });
+
+    const session = response.data;
+
+    // The axios client (src/lib/api.ts) reads the token from localStorage —
+    // keep it in sync so alerts/activity-logs requests carry the JWT too.
+    setAccessToken(session.token);
+
+    return session;
+  } catch (error) {
+    if (isAxiosError(error)) {
+      const message = error.response?.data?.message;
+      if (message) {
+        throw new Error(Array.isArray(message) ? message.join(", ") : message);
+      }
     }
-    pushLog({ user: payload.email, action: "User signed in", result: "success" });
-    return {
-      token: `mock.${btoa(payload.email)}.token`,
-      user: {
-        id: "usr_1",
-        name: "Amina Caregiver",
-        email: DEMO_EMAIL,
-        role: "Caregiver",
-      },
-    } satisfies Session;
-  }, 600);
+    throw error;
+  }
 }
 
-export async function logout(email: string): Promise<void> {
-  return mockRequest(() => {
-    pushLog({ user: email, action: "User signed out", result: "success" });
-  }, 200);
+export async function logout(_email: string): Promise<void> {
+  // Stateless JWT — clearing client-side tokens is enough.
+  removeTokens();
+  return Promise.resolve();
 }
 
-export const DEMO_CREDENTIALS = { email: DEMO_EMAIL, password: DEMO_PASSWORD };
+export const DEMO_CREDENTIALS = {
+  email: "caregiver@smartroom.io",
+  password: "smartroom",
+};

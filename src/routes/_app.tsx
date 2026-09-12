@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { useAuthStore } from "@/stores/auth.store";
+import { useAlertsSSE } from "@/hooks/use-alerts-sse";
+import { useFanSSE } from "@/hooks/use-fan-sse";
 
 export const Route = createFileRoute("/_app")({
   ssr: false,
@@ -13,6 +15,9 @@ function AppLayout() {
   const navigate = useNavigate();
   const token = useAuthStore((s) => s.token);
   const [ready, setReady] = useState(false);
+  
+  useAlertsSSE();
+  useFanSSE();
 
   useEffect(() => {
     void useAuthStore.persist.rehydrate();

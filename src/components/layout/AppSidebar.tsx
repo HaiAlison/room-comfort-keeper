@@ -22,6 +22,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useAlertStore } from "@/stores/alert.store";
 
 const monitoring = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -41,6 +42,7 @@ const records = [
 
 export function AppSidebar() {
   const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const hasUnreadAlerts = useAlertStore((s) => s.hasUnread);
 
   const renderGroup = (label: string, items: readonly { title: string; url: string; icon: typeof Gauge }[]) => (
     <SidebarGroup>
@@ -50,9 +52,12 @@ export function AppSidebar() {
           {items.map((item) => (
             <SidebarMenuItem key={item.url}>
               <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
-                <Link to={item.url}>
+                <Link to={item.url} className="relative flex items-center w-full">
                   <item.icon className="h-4 w-4 shrink-0" />
                   <span>{item.title}</span>
+                  {item.url === '/alerts' && hasUnreadAlerts && (
+                    <div className="absolute right-2 h-2 w-2 rounded-full bg-destructive" />
+                  )}
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

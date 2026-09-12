@@ -2,15 +2,18 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { QUERY_KEYS } from "@/lib/constants";
 import { getActivityLogs } from "@/services/log.service";
-import { getAlerts, resolveAlert } from "@/services/alert.service";
 import { useCurrentUserEmail } from "@/stores/auth.store";
 import { useThemeStore } from "@/stores/theme.store";
+import { alertService } from "@/services/alert.service";
+import { AlertItem } from "@/lib/types";
+import { ActivityLogsQuery, IPagination } from "@/types/api";
 
 export function useAlerts() {
   const autoRefresh = useThemeStore((s) => s.autoRefresh);
   return useQuery({
     queryKey: QUERY_KEYS.alerts,
-    queryFn: getAlerts,
+    queryFn: alertService.getAlerts,
+    select: (data: IPagination<AlertItem>) => data.results,
     refetchInterval: autoRefresh ? 8000 : false,
   });
 }
@@ -19,7 +22,7 @@ export function useResolveAlert() {
   const queryClient = useQueryClient();
   const email = useCurrentUserEmail();
   return useMutation({
-    mutationFn: (alertId: string) => resolveAlert(alertId, email),
+    mutationFn: (alertId: string) => alertService.resolveAlert(alertId, email),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.alerts });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.logs });
@@ -29,6 +32,10 @@ export function useResolveAlert() {
   });
 }
 
-export function useActivityLogs() {
-  return useQuery({ queryKey: QUERY_KEYS.logs, queryFn: getActivityLogs });
+export function useActivityLogs(query: ActivityLogsQuery = {}) {
+  return useQuery({
+    queryKey: [...QUERY_KEYS.logs, query],
+    queryFn: () => getActivityLogs(query),
+  });
 }
+

@@ -22,7 +22,7 @@ export const useThemeStore = create<ThemeState>()(
     (set, get) => ({
       theme: "light",
       autoRefresh: true,
-      refreshIntervalMs: 5000,
+      refreshIntervalMs: 10000,
       setTheme: (theme) => {
         apply(theme);
         set({ theme });

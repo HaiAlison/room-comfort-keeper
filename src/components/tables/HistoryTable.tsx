@@ -38,8 +38,6 @@ export function HistoryTable({
 
   const rows = useMemo(() => {
     return readings
-      .slice()
-      .reverse()
       .map((r) => ({ ...r, status: readingStatus(r.temperature, threshold) }))
       .filter((r) => (status === "all" ? true : r.status === status))
       .filter((r) =>
